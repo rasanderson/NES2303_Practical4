@@ -325,7 +325,7 @@ invertebrates in rivers with different levels of pollution. Aquatic invertebrate
 can be very sensitive to water pollution, and are useful **bio-indicators** of
 pollution events etc.
 
-![](www/river.jpg)
+![](GLM_files/figure-html/river.jpg)
 
 An advanced system has now been developed by the Centre
 for Ecology and Hydrology that is used by the Envionment Agency to assess river
@@ -456,9 +456,10 @@ easier method, based on the `mosaic` package. The `mosaic` package's default `pl
 function will allow you to see the GLM model and original points:
 
 
-```{r glm_plot, echo=TRUE}
+```{r glm_plot_v2, echo=TRUE}
 sppcount_glm <- glm(species~pollution, family = "poisson", data=sppcount)
-plotModel(sppcount_glm)
+gf_point(species~pollution, data=sppcount) %>% 
+  gf_smooth(method = "glm", method.args = list(family="poisson"), se=TRUE)
 ```
 
 To see what happens when we extend the x-axis to 15.0 (which you recall gave
@@ -511,7 +512,7 @@ Lichens are very sensitive to air pollution, and are another type of bioindicato
 The presence or absence of lichens on trees is a good indication of the amount of
 atmospheric pollution.
 
-![](www/lichen.jpeg)
+![](GLM_files/figure-html/lichen.jpeg)
 
 However, their incidence is also affected by the pH of the bark of the tree on
 which they might grow. Therefore this dataset includes not only the amount of air
