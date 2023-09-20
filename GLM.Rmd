@@ -1,5 +1,5 @@
 ---
-title: "Tutorial"
+title: "Count, proportion and presence / absence response variables"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
@@ -13,19 +13,23 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-## Generalised linear models
+## Introduction
+### Linear models
+In the last two weeks, we have been looking at linear models using `lm()`. The
+response data you've looked at has been continuous numerical data, potentially with 
+decimal points.
 
-### Why might we want to generalise a linear model?
-Recall your initial lectures, practicals and online websites from this module,
-and remember that scientific data can arise in different 'forms' or 'types'. For
-example:
+### Data types
+Your response variable may not always be a continuous numerical one. In biology
+you may be dealing with the numbers of birds in a wood
+(whole numbers), percentage of crop damage by a pathogen (bounded 0 to 100) or
+dead/alive (categorical data). Thinking about your data type allows you to 
+improve your standard linear model with a "generalised" linear model that can
+cope with these types of responses:
 
-* **continuous (ratio) data**
+* **Continuous data**
   * These could be positive or negative, and include decimal points, 2.45, 5.01,
   -3.78, 2.00. Examples might include temperate (degrees Centigrade).
-* **continuous (ratio) data, bounded by zero**
-  * Again your data have decimal points, but no zeros; 4.58, 2.912, 5.002 etc.
-  Examples might include length (cm).
 * **Whole number data, bounded by zero**
   * These are often count data, 4, 12, 0, 234. Examples might include the number
   of hedgehogs seen at a site.
@@ -36,34 +40,46 @@ example:
 * **Binary categorical data**
   * Two categories present, often coded as 0 or 1. Again wide occurrence in 
   biology: dead/alive, present/absent, resistant/susceptible etc.
-* **Ordinal categorical data**
-  * Multiple categories present, 'first', 'second', 'third' etc. These can arise
-  in questionnaire surveys where respondants have to select a preference from 1
-  to 5, or river hydrology of stream networks.
-  
-### Baseline assumptions of linear model
-A key assumption of your linear model, using the `lm()` function, is that the
-**response variable** is continuous, i.e. could potentially have decimals. Strictly-
-speaking, negative values should theoretically be possible, although in practice
-for most datasets `lm()` is fairly robust to this assumption, and if your lower
-bound is zero it generally does not cause too many problems. If you have continuous
-data as your response, and you suspect your model is poorly fitted, you can
-often easily correct this by taking a logarithm of your response variable. (Take
-the logarithm as `log(response + 1)` if you have zero values.)
 
-The statistical distribution underlying the standard `lm()` linear model is the
-normal or "Gaussian" distribution, named after Friederick Gauss (German
-mathematician). The graph below shows a frequency histogram of 100 random numbers,
+## Assumptions of linear model
+Linear models assume that our response is a continuous numerical variable, and the model produces normally-distributed residuals with homogeneity of variance. Continuous numerical data can take any value, could be either positive and negative and run from -infinity to +infinity. Thus our model is of the form:
+
+$\text{Response variable} = \text{Explanatory variable(s)} + Error$
+
+and when your response is a continuous numerical variable then it is assumed that
+a histogram of your errors would produce a normal (Gaussian) or bell-shaped curve. 
+
+### Three key types of error distribution
+However, we've just discussed continuous, whole number, proportion and binary data.
+The last three break the assumptions of a linear model, and need to be analysed
+using different error distributions. The four types of data (if we include continuous)
+can be represented by three statistical distributions:
+
+* Gaussian (normal) distribution: classic bell-shaped curve, used for **continuous** response
+* Poisson distribution: **whole number count** response
+* Binomial distribution: **proportion** or a **binary categorical** response
+
+### Generalised linear models
+These are an extension of the standard linear model that you have already used.
+They are called with the `glm()` function, and can handle Gaussian, Poisson and
+Binomial error distributions. Before we look in detail at how `glm()` work, we
+will refresh our memory on the Gaussian (normal) distribution, and introduce
+the Poisson and Binomial distributions using interactive controls.
+
+## Normal distribution
+
+This statistical distribution is named after a 19th Century German mathematician,
+Friederick Gauss. The graph below shows a frequency histogram of 100 random numbers,
 with a mean of 50, and standard deviation of 5, generated using the `rnorm()`
 function which uses a Gaussian or normal distribution.
 
-```{r gaussian_distribution, echo=TRUE, cache=TRUE}
+```{r gaussian_distribution, echo=TRUE, cache=TRUE, warning=FALSE}
 mydata <- rnorm(n = 100, mean = 50, sd = 5)
 gf_histogram(~mydata) %>% 
   gf_lims(x = c(0, 100))
 ```
 
- Look at the scale of the x-axis and it is obvious that we have ratio data with
+ Look at the scale of the x-axis and it is obvious that we have continuous data with
  decimal points, and we can confirm this by looking at the first few numbers in
  `mydata`:
  
@@ -117,18 +133,12 @@ sd flattens and spreads the curve
 * The blue line is a fitted curve according to the Gaussian distribution for 
 these data.
  
-## Poisson and Binomial distributions
-The two distributions you are most likely to need as biologists are the Poisson
-distribution for counts named after Simeon Poisson (French mathematician), and
-the Binomial distribution for 1/0 or presence/absence data (no-one seems to have
-claimed credit for this one!).
-
-Let's have a quick look at these two distributions.
-
-### Poisson distribution
-Remember, this returns whole numbers (no decimals) greater than or equal to zero.
-It takes a parameter $\lambda$ (Greek letter lambda) which adjusts the shape of
-this distribution. Try the interactive below to see what happens:
+## Poisson distribution
+The Poisson distribution for counts is named after Simeon Poisson (French
+mathematician). Remember, this returns whole numbers (no decimals) that are 
+greater than or equal to zero. It takes a single parameter $\lambda$ (Greek
+letter lambda) which adjusts the shape of this distribution. Try the interactive
+below to see what happens:
 
 ```{r poisson_distribution_ui, echo=FALSE}
     titlePanel("The Poisson distribution for whole-number counts")
@@ -168,7 +178,7 @@ it cannot have any values below zero.
 * The histogram is shown slightly differently, as we are dealing with whole
 number counts.
 
-### Binomial distribution
+## Binomial distribution
 This is useful when you have:
 
 * dead / alive
@@ -338,7 +348,8 @@ of the data, run a linear model, examine its summary table, and look at the plot
 of residuals and QQ plot. **Hints:** Use `gf_point()` for the scatterplot, for
 the `lm()` make sure you have your response and explanatory variables the right
 way round. Use `mplot(spp_count_lm, which=1:2)` to check diagnostic the residuals
-and QQ plots, or alternatively manually extract the residuals and use `gf_qq()`.
+and QQ plots with `ggplot2` graphs or `plot(spp_count_lm, which=1:2` for basic
+graphs.
 
 ```{r sppcount_lm, exercise=TRUE}
 
