@@ -50,10 +50,7 @@ and when your response is a continuous numerical variable then it is assumed tha
 a histogram of your errors would produce a normal (Gaussian) or bell-shaped curve. 
 
 ### Three key types of error distribution
-However, we've just discussed continuous, whole number, proportion and binary data.
-The last three break the assumptions of a linear model, and need to be analysed
-using different error distributions. The four types of data (if we include continuous)
-can be represented by three statistical distributions:
+When we move from a linear model to using a GLM, we will need to think about changing the distribution we use or are assuming from our data. If we undertake a GLM using a Gaussian distribution this is very similar to just doing a linear model. The reason to switch to a GLM is because it allows us to work in a generalised framework with other distributions. The two other distributions you are most likely to need as biologists are the Poisson distribution for counts named after Simeon Poisson (French mathematician), and the Binomial distribution for proportion 1/0 or presence/absence data (no-one seems to have claimed credit for this one!).
 
 * Gaussian (normal) distribution: classic bell-shaped curve, used for **continuous** response
 * Poisson distribution: **whole number count** response
@@ -66,31 +63,16 @@ Binomial error distributions. Before we look in detail at how `glm()` work, we
 will refresh our memory on the Gaussian (normal) distribution, and introduce
 the Poisson and Binomial distributions using interactive controls.
 
+Let’s have a quick look at all three distributions and hopefully this will become clearer.
+
 ## Normal distribution
 
 This statistical distribution is named after a 19th Century German mathematician,
-Friederick Gauss. The graph below shows a frequency histogram of 100 random numbers,
-with a mean of 50, and standard deviation of 5, generated using the `rnorm()`
-function which uses a Gaussian or normal distribution.
-
-```{r gaussian_distribution, echo=TRUE, cache=TRUE, warning=FALSE}
-mydata <- rnorm(n = 100, mean = 50, sd = 5)
-gf_histogram(~mydata) %>% 
-  gf_lims(x = c(0, 100))
-```
-
- Look at the scale of the x-axis and it is obvious that we have continuous data with
- decimal points, and we can confirm this by looking at the first few numbers in
- `mydata`:
- 
-```{r, echo=TRUE}
-head(mydata)
-```
-
-As you can see from the above, there are two 'parameters' to a normal
+Friederick Gauss. There are two 'parameters' to a normal
 distribution, the mean and the standard deviation. Conveniently, 95% of the
 data will fall within + or - 1.96 (i.e. approximately 2) standard deviations.
-Adjust the mean and sd here to see their effects.
+
+The interactive tool below will let you change the mean and the standard deviation so you can see how these two parameters alter the position along the x-axis and shape of the normal distribution alogn the x- and y-axes. The blue line represents a fitted curve over the histogram according to the Gaussian distribution which will help you visualise the bell-shape.
 
 ```{r gaussian_distribution_ui, echo=FALSE}
     titlePanel("The normal (Gaussian) distribution")
@@ -125,20 +107,14 @@ output$gauss_plot <- renderPlot({
 ```
 
 **Comments**
+You should have seen the following changes to the plot when you adjusted the mean and standard deviation:
 
-* Note how as you increase or decrease the mean, the distribution moves left or
-right, but remains roughly the same shape
-* A low standard deviation results in the values being packed together; a high
-sd flattens and spreads the curve
-* The blue line is a fitted curve according to the Gaussian distribution for 
-these data.
+* as you increase or decrease the mean, the distribution moves to the left or the right, but remains roughly the same shape
+* a low standard deviation results in the values being packed together while a high standard deviation flattens and spreads the curve
+
  
 ## Poisson distribution
-The Poisson distribution for counts is named after Simeon Poisson (French
-mathematician). Remember, this returns whole numbers (no decimals) that are 
-greater than or equal to zero. It takes a single parameter $\lambda$ (Greek
-letter lambda) which adjusts the shape of this distribution. Try the interactive
-below to see what happens:
+Often biologists and ecologists collect data in the form of counts e.g. the number of birds in wood, or number of bacterial colonies on a Petri dish. These numbers are whole numbers or integers and cannot be negative values or have decimal points. This means that our distribution cannot include numbers less than zero. The Poisson distribution allows us to model count data. It takes a parameter $\lambda$ (Greek letter lambda) which adjusts the shape of this distribution. Try mvoing the the interactive slider left and right to see what happens to the size and shape of the distribution:
 
 ```{r poisson_distribution_ui, echo=FALSE}
     titlePanel("The Poisson distribution for whole-number counts")
@@ -169,7 +145,7 @@ output$poiss_plot <- renderPlot({
 })
 ```
 
-**Note**
+You should have seen the following things happen to the distribution when you moved the slider:
 
 * When $\lambda$ is high, you'll see that the Poisson distribution
 looks fairly similar to a normal distribution, except with whole numbers. However
@@ -179,7 +155,7 @@ it cannot have any values below zero.
 number counts.
 
 ## Binomial distribution
-This is useful when you have:
+There are times when you will collect data that has a binary response. This could be:
 
 * dead / alive
 * present / absent
@@ -196,6 +172,8 @@ Below, we have the simplest setup, 25 replicates, with each of size one (which
 produces a very simple plot). Adjust the size of each replicate, which is
 equivalent to the number of seeds per replicate in the example above, and the
 probability of success, equivalent to the probability of germination.
+
+In the interactive demonstration below, we have the simplest setup, 25 replicates, with each of size one (which produces a very simple plot). Before you adjust the sliders, the sample size is only 1 (e.g. one seed per) replicate, and the probability (of germination) is 0.5. Therefore roughly half of your 25 replicates will fall into the 0 (no germination) category, and half into the 1.0 (germination) category. Adjust the size of each replicate, which is equivalent to the number of seeds per replicate in this example, and the probability of success, equivalent to the probability of germination.
 
 ```{r binomial_distribution_ui, echo=FALSE}
     titlePanel("The binomial distribution")
@@ -230,12 +208,8 @@ output$binom_plot <- renderPlot({
 })
 ```
 
-**Note**
+You should have observed the following:
 
-* Before you adjust the sliders, the sample size is only 1 (e.g. one seed per)
-replicate, and the probability (of germination) is 0.5. Therefore roughly half
-of your 25 replicates will fall into the 0 (no germination) category, and half
-into the 1.0 (germination) category.
 * As you increase the number of seeds per replicate (maximum of 50) you will
 see additional whole numbers appearing on the horizontal axis, representing
 the numbers of successes (e.g. germinating seeds)

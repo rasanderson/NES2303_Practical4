@@ -167,11 +167,16 @@ assumed that a histogram of your errors would produce a normal
 <div id="section-three-key-types-of-error-distribution"
 class="section level3">
 <h3>Three key types of error distribution</h3>
-<p>However, we’ve just discussed continuous, whole number, proportion
-and binary data. The last three break the assumptions of a linear model,
-and need to be analysed using different error distributions. The four
-types of data (if we include continuous) can be represented by three
-statistical distributions:</p>
+<p>When we move from a linear model to using a GLM, we will need to
+think about changing the distribution we use or are assuming from our
+data. If we undertake a GLM using a Gaussian distribution this is very
+similar to just doing a linear model. The reason to switch to a GLM is
+because it allows us to work in a generalised framework with other
+distributions. The two other distributions you are most likely to need
+as biologists are the Poisson distribution for counts named after Simeon
+Poisson (French mathematician), and the Binomial distribution for
+proportion 1/0 or presence/absence data (no-one seems to have claimed
+credit for this one!).</p>
 <ul>
 <li>Gaussian (normal) distribution: classic bell-shaped curve, used for
 <strong>continuous</strong> response</li>
@@ -189,28 +194,23 @@ can handle Gaussian, Poisson and Binomial error distributions. Before we
 look in detail at how <code>glm()</code> work, we will refresh our
 memory on the Gaussian (normal) distribution, and introduce the Poisson
 and Binomial distributions using interactive controls.</p>
+<p>Let’s have a quick look at all three distributions and hopefully this
+will become clearer.</p>
 </div>
 </div>
 <div id="section-normal-distribution" class="section level2">
 <h2>Normal distribution</h2>
 <p>This statistical distribution is named after a 19th Century German
-mathematician, Friederick Gauss. The graph below shows a frequency
-histogram of 100 random numbers, with a mean of 50, and standard
-deviation of 5, generated using the <code>rnorm()</code> function which
-uses a Gaussian or normal distribution.</p>
-<pre class="r"><code>mydata &lt;- rnorm(n = 100, mean = 50, sd = 5)
-gf_histogram(~mydata) %&gt;% 
-  gf_lims(x = c(0, 100))</code></pre>
-<p><img src="GLM_files/figure-html/gaussian_distribution-1.png" width="624" /></p>
-<p>Look at the scale of the x-axis and it is obvious that we have
-continuous data with decimal points, and we can confirm this by looking
-at the first few numbers in <code>mydata</code>:</p>
-<pre class="r"><code>head(mydata)</code></pre>
-<pre><code>## [1] 52.18159 54.58352 47.86784 56.08510 49.99085 52.31534</code></pre>
-<p>As you can see from the above, there are two ‘parameters’ to a normal
+mathematician, Friederick Gauss. There are two ‘parameters’ to a normal
 distribution, the mean and the standard deviation. Conveniently, 95% of
 the data will fall within + or - 1.96 (i.e. approximately 2) standard
-deviations. Adjust the mean and sd here to see their effects.</p>
+deviations.</p>
+<p>The interactive tool below will let you change the mean and the
+standard deviation so you can see how these two parameters alter the
+position along the x-axis and shape of the normal distribution alogn the
+x- and y-axes. The blue line represents a fitted curve over the
+histogram according to the Gaussian distribution which will help you
+visualise the bell-shape.</p>
 <h2>The normal (Gaussian) distribution</h2>
 <div class="row">
 <div class="col-sm-4">
@@ -229,24 +229,27 @@ deviations. Adjust the mean and sd here to see their effects.</p>
 <div class="shiny-plot-output html-fill-item" id="gauss_plot" style="width:100%;height:400px;"></div>
 </div>
 </div>
-<p><strong>Comments</strong></p>
+<p><strong>Comments</strong> You should have seen the following changes
+to the plot when you adjusted the mean and standard deviation:</p>
 <ul>
-<li>Note how as you increase or decrease the mean, the distribution
-moves left or right, but remains roughly the same shape</li>
-<li>A low standard deviation results in the values being packed
-together; a high sd flattens and spreads the curve</li>
-<li>The blue line is a fitted curve according to the Gaussian
-distribution for these data.</li>
+<li>as you increase or decrease the mean, the distribution moves to the
+left or the right, but remains roughly the same shape</li>
+<li>a low standard deviation results in the values being packed together
+while a high standard deviation flattens and spreads the curve</li>
 </ul>
 </div>
 <div id="section-poisson-distribution" class="section level2">
 <h2>Poisson distribution</h2>
-<p>The Poisson distribution for counts is named after Simeon Poisson
-(French mathematician). Remember, this returns whole numbers (no
-decimals) that are greater than or equal to zero. It takes a single
-parameter <span class="math inline">\(\lambda\)</span> (Greek letter
-lambda) which adjusts the shape of this distribution. Try the
-interactive below to see what happens:</p>
+<p>Often biologists and ecologists collect data in the form of counts
+e.g. the number of birds in wood, or number of bacterial colonies on a
+Petri dish. These numbers are whole numbers or integers and cannot be
+negative values or have decimal points. This means that our distribution
+cannot include numbers less than zero. The Poisson distribution allows
+us to model count data. It takes a parameter <span
+class="math inline">\(\lambda\)</span> (Greek letter lambda) which
+adjusts the shape of this distribution. Try mvoing the the interactive
+slider left and right to see what happens to the size and shape of the
+distribution:</p>
 <h2>The Poisson distribution for whole-number counts</h2>
 <div class="row">
 <div class="col-sm-4">
@@ -262,7 +265,8 @@ interactive below to see what happens:</p>
 <div class="shiny-plot-output html-fill-item" id="poiss_plot" style="width:100%;height:400px;"></div>
 </div>
 </div>
-<p><strong>Note</strong></p>
+<p>You should have seen the following things happen to the distribution
+when you moved the slider:</p>
 <ul>
 <li>When <span class="math inline">\(\lambda\)</span> is high, you’ll
 see that the Poisson distribution looks fairly similar to a normal
@@ -276,7 +280,8 @@ whole number counts.</li>
 </div>
 <div id="section-binomial-distribution" class="section level2">
 <h2>Binomial distribution</h2>
-<p>This is useful when you have:</p>
+<p>There are times when you will collect data that has a binary
+response. This could be:</p>
 <ul>
 <li>dead / alive</li>
 <li>present / absent</li>
@@ -294,6 +299,15 @@ one (which produces a very simple plot). Adjust the size of each
 replicate, which is equivalent to the number of seeds per replicate in
 the example above, and the probability of success, equivalent to the
 probability of germination.</p>
+<p>In the interactive demonstration below, we have the simplest setup,
+25 replicates, with each of size one (which produces a very simple
+plot). Before you adjust the sliders, the sample size is only 1
+(e.g. one seed per) replicate, and the probability (of germination) is
+0.5. Therefore roughly half of your 25 replicates will fall into the 0
+(no germination) category, and half into the 1.0 (germination) category.
+Adjust the size of each replicate, which is equivalent to the number of
+seeds per replicate in this example, and the probability of success,
+equivalent to the probability of germination.</p>
 <h2>The binomial distribution</h2>
 <div class="row">
 <div class="col-sm-4">
@@ -312,13 +326,8 @@ probability of germination.</p>
 <div class="shiny-plot-output html-fill-item" id="binom_plot" style="width:100%;height:400px;"></div>
 </div>
 </div>
-<p><strong>Note</strong></p>
+<p>You should have observed the following:</p>
 <ul>
-<li>Before you adjust the sliders, the sample size is only 1 (e.g. one
-seed per) replicate, and the probability (of germination) is 0.5.
-Therefore roughly half of your 25 replicates will fall into the 0 (no
-germination) category, and half into the 1.0 (germination)
-category.</li>
 <li>As you increase the number of seeds per replicate (maximum of 50)
 you will see additional whole numbers appearing on the horizontal axis,
 representing the numbers of successes (e.g. germinating seeds)</li>
@@ -1048,25 +1057,25 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "lm_v_glm", question = structure("What happens if I run glm() without specifying the family?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_d29b7bc", 
+"character")), answers = list(structure(list(id = "lnr_ans_1f3e40", 
     option = "It uses a normal distribution estimated by least squares", 
     value = "It uses a normal distribution estimated by least squares", 
     label = structure("It uses a normal distribution estimated by least squares", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It uses a normal (Gaussian) distribution, but\nestimates by maximum likelihood. The coefficients for the\nintercept and gradient will be the same, but AIC and deviance\nwill show.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_c3fc7f", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3e782ba", 
     option = "It uses a binomial distribution estimated by maximum likelihood", 
     value = "It uses a binomial distribution estimated by maximum likelihood", 
     label = structure("It uses a binomial distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_9b3cacb", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_2fd6d24", 
     option = "It uses a Poisson distribution estimated by maximum likelihood", 
     value = "It uses a Poisson distribution estimated by maximum likelihood", 
     label = structure("It uses a Poisson distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_edc672c", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_de75519", 
     option = "It uses a Gaussian distribution estimated by maximum likelihood", 
     value = "It uses a Gaussian distribution estimated by maximum likelihood", 
     label = structure("It uses a Gaussian distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
@@ -1079,32 +1088,32 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "lm_v_glm-answer", question = "lm_v_glm"), loading = NULL, 
-    random_answer_order = TRUE, allow_retry = TRUE, seed = 1751164366.68455, 
+    random_answer_order = TRUE, allow_retry = TRUE, seed = 465509818.28323, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "recode", question = structure("Looking at the summary output above, what might be useful to do before\nvisualising and analysing the data?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_5e24c86", 
+"character")), answers = list(structure(list(id = "lnr_ans_457b709", 
     option = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     value = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     label = structure("Since pH uses a log scale, it is essential to log-transform\nthe calcium content", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. Whilst pH does use log, it is\nbased on hydrogen-ion concentration not calcium", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_1cd0dd7", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_df1d7f3", 
     option = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     value = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the air pollution to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_41424", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3496114", 
     option = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     value = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the calcium to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_7683993", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_916bccc", 
     option = "Convert the presence and absence of lichen to a factor", 
     value = "Convert the presence and absence of lichen to a factor", 
     label = structure("Convert the presence and absence of lichen to a factor", html = TRUE, class = c("html", 
@@ -1117,7 +1126,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "recode-answer", question = "recode"), loading = NULL, 
-    random_answer_order = FALSE, allow_retry = TRUE, seed = 1168309993.45596, 
+    random_answer_order = FALSE, allow_retry = TRUE, seed = 936242472.064028, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
@@ -1213,19 +1222,19 @@ learnr:::store_exercise_cache(structure(list(label = "boxplot_airpoll", global_s
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "which_lichen_model", 
     question = structure("Which term(s) should be removed for the simpler model?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_6f4542f", 
+    "character")), answers = list(structure(list(id = "lnr_ans_8ffce91", 
         option = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         value = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         label = structure("All terms are non-significant terms, therefore we cannot make\na simpler model", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No. Always look at the interaction\nterm first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_df1409a", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_677ad9b", 
         option = "Only keep airpoll as it appears to be most important", 
         value = "Only keep airpoll as it appears to be most important", 
         label = structure("Only keep airpoll as it appears to be most important", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No.\nSince the interaction term is non-significant it should be\nremoved first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_9f697e8", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_73f1e31", 
         option = "The interaction term should be removed first and the new model\n                tested", 
         value = "The interaction term should be removed first and the new model\n                tested", 
         label = structure("The interaction term should be removed first and the new model\ntested", html = TRUE, class = c("html", 
@@ -1239,7 +1248,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
     "character")), message = NULL, post_message = NULL), ids = list(
         answer = "which_lichen_model-answer", question = "which_lichen_model"), 
     loading = NULL, random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 499273630.767508, options = list()), class = c("learnr_radio", 
+    seed = 578117839.230793, options = list()), class = c("learnr_radio", 
 "tutorial_question")), session = session)
 </script>
  
