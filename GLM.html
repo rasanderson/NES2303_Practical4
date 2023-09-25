@@ -458,6 +458,18 @@ SS.</li>
 errors, you need an extra step to account for the link function.</li>
 </ul>
 </div>
+<div id="section-the-output-looks-different---why"
+class="section level3">
+<h3>The output looks different - why?</h3>
+<p>When you use <code>glm()</code> rather than <code>lm()</code> you’ll
+notice your model <code>summary()</code> is displayed slightly
+differently. That is because <code>glm()</code> uses something called
+“maximum-likelihood” when estimating parameters. You don’t need to know
+the complex mathematics behind this (phew!) but there is a very
+accessible description of the basic at <a
+href="https://academic.oup.com/book/27290/chapter/196938074">Getting
+Started with R: introduction for biologists</a> Chapter 7.</p>
+</div>
 </div>
 <div id="section-glm-with-count-data" class="section level2">
 <h2>GLM with count data</h2>
@@ -540,11 +552,23 @@ generalised linear model.</p>
 <div id="section-correct-analysis-with-glm-function"
 class="section level3">
 <h3>Correct analysis with <code>glm()</code> function</h3>
-<p>Remember that for count data the correct statistical distribution is
-the <strong>Poisson distribution</strong> So simply replace your
-original <code>lm()</code> function with <code>glm()</code>, adding the
-option in the latter that <code>family = poisson</code>. Again display
-the model <code>summary()</code> and diagnostic plots.</p>
+<p>Now let’s analyse these using GLM instead using the correct
+distribution and link function. R will automatically pick the correct
+transformation for the link function but we will state it explicitly to
+help you connect the statistical distribution to the appropriate link
+function. You will also see where you would need to state it when
+writing the R code. We need to alter slightly what we put into the
+model:</p>
+<p><code>glm(response ~ explanatory, family = distribution(link ="X"), data =  data_set)</code></p>
+<p>You can see an extra term in the model which is <code>family =</code>
+that relates to the distribution we will be using and specifies the link
+function. Since we are using count data, the correct distribution we
+will need to use is the Poisson distribution and the link function will
+be log. Thinking about the linear model which you just created, simply
+replace your original <code>lm()</code> function with <code>glm()</code>
+and add <code>family = poisson(link = "log")</code>. Again display the
+model <code>summary()</code> and diagnostic plots via
+<code>plot()</code>.</p>
 <div class="tutorial-exercise" data-label="sppcount_glm"
 data-completion="1" data-diagnostics="1" data-startover="1"
 data-lines="0">
@@ -557,7 +581,7 @@ data-diagnostics="1" data-startover="1" data-lines="0">
 gf_point(species ~ pollution, data=sppcount)
 
 # Create linear model, check coefficients and R-squared
-sppcount_glm &lt;- glm(species~pollution, family = poisson, data=sppcount)
+sppcount_glm &lt;- glm(species~pollution, family = poisson(link = &quot;log&quot;), data=sppcount)
 summary(sppcount_glm)
 
 # Display first two diagnostic plots
@@ -573,6 +597,15 @@ AIC the better.</li>
 compare the range of values on the y-axis of the QQ plot for the
 <code>lm()</code> and <code>glm()</code></li>
 </ul>
+</div>
+<div id="section-writing-up-the-results" class="section level3">
+<h3>Writing up the results</h3>
+<p>The output from your summary is slightly different from
+<code>lm()</code>. To write the above model up I would write something
+similar to “There was a significant negative effect of pollution on
+species richness (AIC = 163.76, z = -7.165, p &lt; 0.001)”. Several
+schema are acceptable for reporting GLMs, but this is probably the most
+common.</p>
 <div class="panel panel-default tutorial-question-container">
 <div data-label="lm_v_glm" class="tutorial-question panel-body">
 <div id="lm_v_glm-answer_container" class="shiny-html-output"></div>
@@ -759,11 +792,11 @@ gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05)</code></pre>
 <p>We can now create the binomial GLM, using the two ‘main effects’ of
 <code>calcium</code> and <code>airpoll</code>, and also the interaction
 term. Remember that the summary table shows deviance and AIC.</p>
-<pre class="r"><code>lichen_glm1 &lt;- glm(lichen ~ calcium + airpoll + calcium:airpoll, family=binomial, data=lichens_dat)
+<pre class="r"><code>lichen_glm1 &lt;- glm(lichen ~ calcium + airpoll + calcium:airpoll, family=binomial(link = &quot;logit&quot;), data=lichens_dat)
 summary(lichen_glm1)</code></pre>
 <pre><code>## 
 ## Call:
-## glm(formula = lichen ~ calcium + airpoll + calcium:airpoll, family = binomial, 
+## glm(formula = lichen ~ calcium + airpoll + calcium:airpoll, family = binomial(link = &quot;logit&quot;), 
 ##     data = lichens_dat)
 ## 
 ## Deviance Residuals: 
@@ -803,7 +836,7 @@ data-lines="0">
 <div class="tutorial-exercise-support"
 data-label="simpler_lichen_glm-solution" data-completion="1"
 data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>lichen_glm2 &lt;- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)
+<pre class="text"><code>lichen_glm2 &lt;- glm(lichen ~ calcium + airpoll, family=binomial(link = &quot;logit&quot;), data=lichens_dat)
 summary(lichen_glm2)</code></pre>
 </div>
 <p>We can compare two GLM models using the <code>anova()</code>
@@ -1057,7 +1090,7 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
         label = "\"sppcount_glm\"", exercise = "TRUE"), engine = "r")), 
     code_check = NULL, error_check = NULL, check = NULL, solution = structure(c("# Create scatterplot", 
     "gf_point(species ~ pollution, data=sppcount)", "", "# Create linear model, check coefficients and R-squared", 
-    "sppcount_glm <- glm(species~pollution, family = poisson, data=sppcount)", 
+    "sppcount_glm <- glm(species~pollution, family = poisson(link = \"log\"), data=sppcount)", 
     "summary(sppcount_glm)", "", "# Display first two diagnostic plots", 
     "mplot(sppcount_glm, which=1:2)"), chunk_opts = list(label = "sppcount_glm-solution")), 
     tests = NULL, options = list(eval = FALSE, echo = TRUE, results = "markup", 
@@ -1085,25 +1118,25 @@ learnr:::store_exercise_cache(structure(list(label = "sppcount_glm", global_setu
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "lm_v_glm", question = structure("What happens if I run glm() without specifying the family?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_6ada544", 
+"character")), answers = list(structure(list(id = "lnr_ans_ccc773e", 
     option = "It uses a normal distribution estimated by least squares", 
     value = "It uses a normal distribution estimated by least squares", 
     label = structure("It uses a normal distribution estimated by least squares", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It uses a normal (Gaussian) distribution, but\nestimates by maximum likelihood. The coefficients for the\nintercept and gradient will be the same, but AIC and deviance\nwill show.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_7d633df", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3fba092", 
     option = "It uses a binomial distribution estimated by maximum likelihood", 
     value = "It uses a binomial distribution estimated by maximum likelihood", 
     label = structure("It uses a binomial distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3c1ccac", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_3c37bf2", 
     option = "It uses a Poisson distribution estimated by maximum likelihood", 
     value = "It uses a Poisson distribution estimated by maximum likelihood", 
     label = structure("It uses a Poisson distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. It defaults to a normal (Gaussian) distribution, but\nestimates by maximum likelihood.", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_d574c7f", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_a33c4e1", 
     option = "It uses a Gaussian distribution estimated by maximum likelihood", 
     value = "It uses a Gaussian distribution estimated by maximum likelihood", 
     label = structure("It uses a Gaussian distribution estimated by maximum likelihood", html = TRUE, class = c("html", 
@@ -1116,7 +1149,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "lm_v_glm-answer", question = "lm_v_glm"), loading = NULL, 
-    random_answer_order = TRUE, allow_retry = TRUE, seed = 668788377.188571, 
+    random_answer_order = TRUE, allow_retry = TRUE, seed = 669763322.688117, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
@@ -1124,25 +1157,25 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "recode", question = structure("Looking at the summary output above, what might be useful to do before\nvisualising and analysing the data?", html = TRUE, class = c("html", 
-"character")), answers = list(structure(list(id = "lnr_ans_a0fa0c0", 
+"character")), answers = list(structure(list(id = "lnr_ans_ecb5bc0", 
     option = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     value = "Since pH uses a log scale, it is essential to log-transform\n                the calcium content", 
     label = structure("Since pH uses a log scale, it is essential to log-transform\nthe calcium content", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No. Whilst pH does use log, it is\nbased on hydrogen-ion concentration not calcium", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_714a3f1", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_578b10d", 
     option = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     value = "Standardise the air pollution to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the air pollution to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_1226c50", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_8e8bb41", 
     option = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     value = "Standardise the calcium to zero mean and unit standard\n                deviation", 
     label = structure("Standardise the calcium to zero mean and unit standard\ndeviation", html = TRUE, class = c("html", 
     "character")), correct = FALSE, message = structure("No, this is not essential, although be\naware that this is sometimes useful if the explanatory variables\nare on very different scales", html = TRUE, class = c("html", 
     "character")), type = "literal"), class = c("tutorial_question_answer", 
-"tutorial_quiz_answer")), structure(list(id = "lnr_ans_a865864", 
+"tutorial_quiz_answer")), structure(list(id = "lnr_ans_bb85060", 
     option = "Convert the presence and absence of lichen to a factor", 
     value = "Convert the presence and absence of lichen to a factor", 
     label = structure("Convert the presence and absence of lichen to a factor", html = TRUE, class = c("html", 
@@ -1155,7 +1188,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
 "character")), incorrect = structure("Incorrect", html = TRUE, class = c("html", 
 "character")), message = NULL, post_message = NULL), ids = list(
     answer = "recode-answer", question = "recode"), loading = NULL, 
-    random_answer_order = FALSE, allow_retry = TRUE, seed = 126959097.44088, 
+    random_answer_order = FALSE, allow_retry = TRUE, seed = 383865343.821249, 
     options = list()), class = c("learnr_radio", "tutorial_question"
 )), session = session)
 </script>
@@ -1250,19 +1283,19 @@ learnr:::store_exercise_cache(structure(list(label = "boxplot_airpoll", global_s
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label = "which_lichen_model", 
     question = structure("Which term(s) should be removed for the simpler model?", html = TRUE, class = c("html", 
-    "character")), answers = list(structure(list(id = "lnr_ans_c97214d", 
+    "character")), answers = list(structure(list(id = "lnr_ans_53c522d", 
         option = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         value = "All terms are non-significant terms, therefore we cannot make\n                a simpler model", 
         label = structure("All terms are non-significant terms, therefore we cannot make\na simpler model", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No. Always look at the interaction\nterm first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_748fa5a", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_72570cc", 
         option = "Only keep airpoll as it appears to be most important", 
         value = "Only keep airpoll as it appears to be most important", 
         label = structure("Only keep airpoll as it appears to be most important", html = TRUE, class = c("html", 
         "character")), correct = FALSE, message = structure("No.\nSince the interaction term is non-significant it should be\nremoved first", html = TRUE, class = c("html", 
         "character")), type = "literal"), class = c("tutorial_question_answer", 
-    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_de8e6a6", 
+    "tutorial_quiz_answer")), structure(list(id = "lnr_ans_bba75c7", 
         option = "The interaction term should be removed first and the new model\n                tested", 
         value = "The interaction term should be removed first and the new model\n                tested", 
         label = structure("The interaction term should be removed first and the new model\ntested", html = TRUE, class = c("html", 
@@ -1276,7 +1309,7 @@ learnr:::question_prerendered_chunk(structure(list(type = "learnr_radio", label 
     "character")), message = NULL, post_message = NULL), ids = list(
         answer = "which_lichen_model-answer", question = "which_lichen_model"), 
     loading = NULL, random_answer_order = TRUE, allow_retry = TRUE, 
-    seed = 782859859.635453, options = list()), class = c("learnr_radio", 
+    seed = 878072743.091115, options = list()), class = c("learnr_radio", 
 "tutorial_question")), session = session)
 </script>
 
@@ -1296,7 +1329,7 @@ learnr:::store_exercise_cache(structure(list(label = "simpler_lichen_glm", globa
     chunks = list(list(label = "simpler_lichen_glm", code = "", 
         opts = list(label = "\"simpler_lichen_glm\"", exercise = "TRUE"), 
         engine = "r")), code_check = NULL, error_check = NULL, 
-    check = NULL, solution = structure(c("lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)", 
+    check = NULL, solution = structure(c("lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial(link = \"logit\"), data=lichens_dat)", 
     "summary(lichen_glm2)"), chunk_opts = list(label = "simpler_lichen_glm-solution")), 
     tests = NULL, options = list(eval = FALSE, echo = TRUE, results = "markup", 
         tidy = FALSE, tidy.opts = NULL, collapse = FALSE, prompt = FALSE, 

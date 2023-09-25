@@ -303,6 +303,13 @@ be thought of as a 'generalised' SS.
 * If making predictions for new data based on Poisson or Binomial errors, you
 need an extra step to account for the link function.
 
+### The output looks different - why?
+When you use `glm()` rather than `lm()` you'll notice your model `summary()` is
+displayed slightly differently. That is because `glm()` uses something called
+"maximum-likelihood" when estimating parameters. You don't need to know the
+complex mathematics behind this (phew!) but there is a very accessible
+description of the basic at [Getting Started with R: introduction for biologists](https://academic.oup.com/book/27290/chapter/196938074) Chapter 7.
+
 ## GLM with count data
 ### What goes wrong with `lm()`?
 We'll begin by looking at a simple example of the numbers of species of aquatic
@@ -374,10 +381,11 @@ numbers of species, which obviously cannot happen. To solve the problem, we'll
 repeat the analysis, but as a generalised linear model.
 
 ### Correct analysis with `glm()` function
-Remember that for count data the correct statistical distribution is the **Poisson distribution**
-So simply replace your original `lm()` function with `glm()`, adding the option
-in the latter that `family = poisson`. Again display the model `summary()` and
-diagnostic plots.
+Now let's analyse these using GLM instead using the correct distribution and link function. R will automatically pick the correct transformation for the link function but we will state it explicitly to help you connect the statistical distribution to the appropriate link function. You will also see where you would need to state it when writing the R code. We need to alter slightly what we put into the model:
+
+`glm(response ~ explanatory, family = distribution(link ="X"), data =  data_set)`
+
+You can see an extra term in the model which is `family =`  that relates to the distribution we will be using and specifies the link function. Since we are using count data, the correct distribution we will need to use is the Poisson distribution and the link function will be log. Thinking about the linear model which you just created, simply replace your original `lm()` function with `glm()` and add `family = poisson(link = "log")`. Again display the model `summary()` and diagnostic plots via `plot()`.
 
 ```{r sppcount_glm, exercise=TRUE}
 
@@ -387,7 +395,7 @@ diagnostic plots.
 gf_point(species ~ pollution, data=sppcount)
 
 # Create linear model, check coefficients and R-squared
-sppcount_glm <- glm(species~pollution, family = poisson, data=sppcount)
+sppcount_glm <- glm(species~pollution, family = poisson(link = "log"), data=sppcount)
 summary(sppcount_glm)
 
 # Display first two diagnostic plots
@@ -400,6 +408,13 @@ mplot(sppcount_glm, which=1:2)
 value there is an AIC. When comparing models the lower the AIC the better.
 * The QQ plot has an S-shaped curve, but this is less than before: compare the
 range of values on the y-axis of the QQ plot for the `lm()` and `glm()`
+
+### Writing up the results
+The output from your summary is slightly different from `lm()`. To write the
+above model up I would write something similar to "There was a significant
+negative effect of pollution on species richness (AIC = 163.76, z = -7.165,
+p < 0.001)". Several schema are acceptable for reporting GLMs, but this is 
+probably the most common.
 
 ```{r lm_v_glm, echo=FALSE}
 question("What happens if I run glm() without specifying the family?",
@@ -587,7 +602,7 @@ and `airpoll`, and also the interaction term. Remember that the summary table
 shows deviance and AIC.
 
 ```{r full_lichen_glm, echo=TRUE}
-lichen_glm1 <- glm(lichen ~ calcium + airpoll + calcium:airpoll, family=binomial, data=lichens_dat)
+lichen_glm1 <- glm(lichen ~ calcium + airpoll + calcium:airpoll, family=binomial(link = "logit"), data=lichens_dat)
 summary(lichen_glm1)
 ```
 
@@ -615,7 +630,7 @@ and look at the summary:
 
 ```
 ```{r simpler_lichen_glm-solution}
-lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial, data=lichens_dat)
+lichen_glm2 <- glm(lichen ~ calcium + airpoll, family=binomial(link = "logit"), data=lichens_dat)
 summary(lichen_glm2)
 ```
 
