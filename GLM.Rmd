@@ -276,15 +276,16 @@ intermediate variable $\eta$ (Greek letter eta). So our equation now becomes:
 $$\eta = \sum_{j=1}^{p} \beta_jx_j + \epsilon$$
 
 ### How to link back to the response
-How to we then calculate
+How do we then calculate
 $$y = \eta$$
-Fortunately, R's `glm()` function automatically picks the correct transformation
-for the **link function**:
+There are 3 link functions which we need to know about, for now, which relate to the 3 distributions we have been through:
 
-* normal (Gaussian) = do nothing (no change), or "identity" link.
-* Poisson errors = log link. This uses natural logs, rather than logs to base 10
-* Binomial errors = logit link. This is a little more complex, but R sets it
-automatically
+* identity = when we need to use a normal (Gaussian) distribution. This is used with the linear models we have already discussed earlier in this course. No transformation needed to convert $\eta$ to $y$.
+* log link = when we need to use a Poisson distribution and we have count data. This uses natural logs rather than logs to base 10 to model the response variable.
+* logit link = when we need to use a binomial distribution and our response variable is binary. This is a little more complex, but R sets it automatically.
+
+Fortunately, R's `glm()` function automatically picks the correct transformation
+for the link function.
 
 ### Do I need to worry about this?
 On a day-to-day basis, no (which is why I have avoided too many equations)! But
@@ -674,15 +675,36 @@ lichen_fit <- makeFun(lichen_glm2)
 lichen_fit(calcium=2, airpoll=5)
 ```
 
+### Adding the fitted line
+
 If we want to create a plot with the curve for the predicted probability across
 a range of calcium values, we can create a new GLM that only includes calcium,
 and make predictions from that. However, for a simple visualisation, it's often
 easier to use `gf_jitter()` with `gf_smooth()` as we did for the Poisson GLM:
 
-```{r lichen_fit_and_plot, exercise=TRUE}
+```{r lichen_fit_and_plot, exercise=FALSE}
 gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05) %>% 
   gf_smooth(method = "glm", method.args=list(family="binomial"), se=TRUE)
 ```
 
-Modify the code above, to create a plot showing the predicted probability curve
+Modify the code below, to create a plot showing the predicted probability curve
 for air pollution `airpoll` instead of calcium.
+
+```{r lichen_fit_and_plot2, exercise=TRUE}
+gf_jitter(lichen ~ calcium, data=lichens_dat, height=0.05) %>% 
+  gf_smooth(method = "glm", method.args=list(family="binomial"), se=TRUE)
+```
+
+## Summary
+Key things to remember about generalised linear models, GLMs, are:
+
+* they are an extension of linear models, in that they as well as continuous 
+response variables, they can handle other responses, such as count, proportion
+or binary data.
+* the error component of a GLM is more flexible as a result, so you can specify
+whether Guassian, Poisson or Binomial errors are needed
+* a slightly different method is used to estimate the model parameters, namely
+maximum likelihood rather than least-squares. Thus the format of the model
+output may appear slightly different.
+* you can continue to use conventional diagnostic plots to check that the
+assumptions of your model are valid.
