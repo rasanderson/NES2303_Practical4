@@ -723,3 +723,6 @@ maximum likelihood rather than least-squares. Thus the format of the model
 output may appear slightly different.
 * you can continue to use conventional diagnostic plots to check that the
 assumptions of your model are valid.
+
+There is an excellent, easy to read, introduction to GLMs at Andy Beckerman's
+Book [Chapter 7 - Getting started with Generalized Linear Models](https://academic.oup.com/book/27290/chapter/196938074)
