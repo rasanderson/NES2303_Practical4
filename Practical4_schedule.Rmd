@@ -170,11 +170,14 @@ So now what does this all mean.
  - `pollution` this is the change in your number of species with increasing pollution, which is negative, reflecting a decline in biodiversity with pollution. However, the value of -0.139 probably seems a bit odd
 - instead of t-statistics, maximum likelihood methods such as GLM produce z-statistics, which can be interpreted in a similar way to produce p-values. Both p-values are extremely low. Remember that `7.79-e13` is shorthand for `0.000000000000779` which you would write as `p<0.001` in a report.
 
-* The **residual deviance** is a measure of how good your model is. If your residual deviance value is close to zero, then the model is not very good. 
+* The **residual deviance** is a measure of how good your model is. If your residual deviance value is close to zero, then the model is  very good. 
 * The **AIC** value is used when comparing two similar models, the lower the AIC, the better the model.
 * Finally, the **Fisher score** is a measure of how many iterations of the model R ran looking at different estimates before displaying the results. 
 
-There is a lot of information in the output and it is easy to get overwhelmed. The main things to note are the `Estimate` values, and when you report them in a table you would typically quote their associated z and p statistics, along with the overall AIC.
+There is a lot of information in the output and it is easy to get overwhelmed. The main things to note are the `Estimate` values, and when you report them in a table you would typically quote their associated z and p statistics, along with the overall AIC. Another useful thing is to assess the percentage variation explained by your model:
+
+$$ \text{%  explained by model} = \frac{\text{Null deviance} - \text{Residual deviance}}{\text{Null deviance}}*100$$
+Now you can calculate the percentage variation explained by your model above, based on the output of your summary table. Remember to use brackets around the subtraction term.
 
 #### What about the strange Estimates from the GLM?
 As we noted above, the values of 3.43 and -0.139 do not quite match what was expected. Indeed, looking at your original graph, an estimated number of species of only 3.43 when the water is unpolluted (x-axis at zero) does not match your graph where it looks to be around 29 or 30 species! This is because GLMs use what is known as a "link function" in their calculations; if you are interested see the [How to generalise page from the interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-how-to-generalise). Poisson GLMs use natural logarithms as their link function, so we would need to take the antilogarithm to get back to the original units. As these are natural logarithms, (i.e. $log_e$ rather than $log_{10}$) we need to take the exponential to convert to the original units, available through the `exp()` function. Let's check with the expected number of species when pollution is zero, i.e. the intercept:
@@ -315,8 +318,8 @@ When you have the results of a model with one or more interaction terms, the bes
 
 * refit the model without the most complicated non-significant interaction term (here simply the `airpoll:calcium` term)
 * look at the `summary()` of the model
-* see if the simpler model is significantly different from the more complex one using `anova()`
-* repeat if needed
+* see if the simpler model is as good as the more complex one (models can be formally compared if needed)
+* repeat if required
 
 There are actually two ways available to refit your model without the interaction term, and you can use both approaches for models fit with either `lm()` or `glm()`. The first is fairly obvious:
 
@@ -354,18 +357,9 @@ If you have a complex `lm()` or `glm()` model that would take you several attemp
 summary(lichen_glm2)
 ```
 
-Notice now that the main effects for air pollution and calcium are significant after removing the interaction term. Also, the **AIC** value is lower in the second model meaning this model is an improvement over the more complex one we ran earlier. What do the results of this simpler model tell you about lichen and its relationship with calcium and air pollution?
+Notice now that the main effects for air pollution and calcium are both significant after removing the interaction term. Also, the **AIC** value is lower in the second model meaning this model is an improvement over the more complex one we ran earlier. What do the results of this simpler model tell you about lichen and its relationship with calcium and air pollution? Which have positive or negative effects on the presence of lichens?
 
-You might want to know if this simpler model is a significant improvement on the first, and you can use the `anova()` function to do this. As you know, by default `anova()` calculates "sums of squares", "mean squares" (old-fashioned name for variances) and "F-ratios" as part of the process of testing for significance to calculate a p-value. However, GLMs do not use mean squares, instead they use "maximum likelihood" to estimate parameters. Therefore we have to tell the `anova()` function to do a Chi-squared test to see if the two models are the same:
-
-`````{r, eval=FALSE}
-anova(lichen_glm1, lichen_glm2, test="Chisq")
-```
-```{r, echo=FALSE}
-print(anova(lichen_glm1, lichen_glm2, test="Chisq"))
-```
-
-At first this is a bit confusing; it says there is no difference (p greater than 0.05) in the models! The way to interpret this is that the second, simpler model, is just as effective as the overly complicated one that contained the interaction term. The second model is simpler, has a lower AIC indicating it is better, and is just as effective, so is the one to use.
+The better of the two models is the second, simpler one, without the interaction term. A good general rule is 'KISS' (Keep it Simple Stupid) as it is easy to create too complex a model to isn't biologically meaningful. Finally, look at the outputs of `summary(lichen_glm2)` : what is the percentage variation explained by this model?
 
 ### 2.2.3 Checking binomial model assumptions and making predictions
 It is actually quite difficult to interpret the residuals from a binomial model, because the response variable is binary. Therefore, whilst you can create a QQ plot, do not be surprised if the plot shows quite a big curve in it. Some people recommend the `binnedplot()` function from the `arm` R package, which we have not used in this course. If you wish, feel free to investigate it, but it is entirely optional.
@@ -387,7 +381,7 @@ round(lichen_glm_predict(calcium=2, airpoll=5), 4)
 ```
 
 
-# 3. Binomial GLMs where the sample size varies
+# 3. Binomial GLMs where the sample size varies (Optional: in your own time)
 ## 3.1 Sample sizes in binomial GLMs
 The lichen example had a sample size of one, in that one record (presence or absence of lichen) was available at each site. However, if you look at the [interactive description of binomial distributions](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-and-binomial-distributions) you can see that we can we can in fact vary the sample size. Initially on the website it is set a 1, but you can change this and see what happens.
 
