@@ -120,7 +120,7 @@ summary(sppcount_lm)
 As you would expect, the model is highly significant, with a negative (significant) gradient for slope of -2.57, in other words for every 1 mg/l increase in pollution there is a decline in the number of species by about 2.57. When there is no pollution the number of species is about 29, which matches the graph you have just plotted above, when the horizontal axis of pollution is at zero.  There are two major problems however, the second of which you may already have spotted:
 
 ### 1.3.1 Have model assumptions been broken?
-You will recall that linear models assume your data (or more precisely, the noise or errors around your fitted line) come from a normal or Gaussian distribution. The easiest way to check this is via a QQ plot:
+You will recall that linear models assume your data (or more precisely, the noise or errors around your fitted line) come from a normal or Gaussian distribution. The easiest way to check this is via a QQ plot. Remember to click in the Console window (bottom left) and hit the big 'Enter' key :
 
 ```{r}
 # Check that assumptions of model are correct - no they are not!
@@ -189,7 +189,7 @@ exp(3.43)
 That looks more sensible based on our original scatterplot of the data. To finish off, we will check the model assumptions, predict the number of species when pollution is 12 mg/l and replot our original graph, but with a GLM rather than linear model.
 
 ### 1.4.1 Check Poisson GLM model assumptions
-As before, create a QQ plot of the residuals. Copy, paste and edit your original `gf_qq()` and `gf_line()` code in your `Practical_4.R` script to save time typing. You should end up with a graph similar to this:
+As before, create a QQ plot of the residuals. Use the `plot()` function and specify `which = 1:2` as parameters, as earlier. Remember to click in the Console window (bottom left) and hit enter to see each plot. You should end up with graphs similar to these:
 
 ```{r, echo=FALSE}
 # Check GLM model assumptions - these look good
