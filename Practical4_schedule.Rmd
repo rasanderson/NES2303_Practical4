@@ -26,16 +26,16 @@ The overall aim of this practical is to help you have a better understanding of 
 4. Consider lognormal response data (response positive numbers, e.g. weight, height)
 
 ## Setting up for the practical  
+### Before you begin
+1. Start RStudio in the usual way. Open your `NES2303` project from the main menu by clicking on **File -> Open project...** and navigate to your NES2303 project file and open it. Check that the word "None" has been replaced by "NES2303" in the project listing at the top right of the RStudio window.
+2. From the main menu click "File -> New file -> R Script"
+3. Save your script, e.g. call it `practical4.R`
 
-First, go to Canvas and download the **lichen.csv**,  **sppcount.csv** and **beetle.csv** data sets and save them to your **Data** folder in the **NES2303** folder where you have your R project stored.  
+### Data for this practical
+Go to Canvas and download the **lichen.csv**,  **sppcount.csv** and **beetle.csv** data sets. Start up your "File Explorer" and move the files from your **Downloads** folder to either your **NES2303** folder, or your **NES2303/Data** folder depending on your preferences.
 
-Second, start RStudio, and click on **File -> Recent Projects** and select the NES2303 project.
-
-Finally, create a new R script by clicking on **File -> New File -> R Script**. Save this file into your NES2303 folder, calling it _**Practical_4.R**_.
-
-## Initial lines in your script
-
-As usual, begin your script with a useful comment, and then load the `mosaic` and `car` packages.
+### Initial lines in your script
+As usual, begin your script with a useful comment, and then load the `mosaic` and `car` packages, as shown below:
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 # Practical 4. Exploration of data using generalised linear models
@@ -46,8 +46,8 @@ library(car)
 
 ```
 
-#### Importing data from .csv files into R 
-Now load in the two .csv files you downloaded from  Canvas. `lichen.csv` and `sppcount.csv` at the very beginning of the practical. **Note**: Remember to move the two files into your **`Data`** folder before using `read.csv()` to import them into R.
+### Import data from .csv files into R 
+Now import the three .csv files you downloaded from Canvas into R, `lichen.csv`, `sppcount.csv` and `beetle.csv`. Add the following code, plus suitable comments, to your `practical4.R` script. **Note**: The code below assumes you have a `Data` subfolder inside your `NES2303` folder. If you have stored your CSV files directly in your `NES2303` folder then omit the `Data/` from below.
 
 ```{r echo=TRUE,  message=FALSE, warning=FALSE}
 lichen_dat <- read.csv("Data/lichen.csv")
@@ -89,7 +89,7 @@ Now let's visualise the data. Recall your graph-plotting skills from the previou
 * Use the `%>%` or "THEN" symbol at the end of the first and subsequent lines before adding new ones
 * On your second line, refine your labels with `gf_labs()`
 * On your third line, add a fitted linear model line using `gf_lm()`. The plot below also includes the 95% confidence intervals for this fitted line. Use `?gf_lm` to read the help page to work out how to use the `interval` option to the function
-* finally `gf_refine()` to refine your graph using a different theme such as `theme_bw()` or as here `theme_classic()`
+* finally `gf_theme()` to refine your graph using a different theme such as `theme_bw()` or as here `theme_classic()`
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -102,7 +102,7 @@ gf_point(species~pollution, data = sppcount_dat) %>%
 
 ```
 
-The plot above shows a clear link between the total number of aquatic invertebrate species and the amount of pollution present in the water. Visualisation is insufficient to test our (null) hypothesis that there about relationships between pollution and number of species. We need a formal statistical model. We will begin by doing it the "wrong" way with a linear model, and diagnose what is incorrect. **Note**: Look carrefully at the graph you have just created, and you might already be able to detect a potential problem. What is it?
+The plot above shows a clear link between the total number of aquatic invertebrate species and the amount of pollution present in the water. Visualisation is insufficient to test our (null) hypothesis that there about relationships between pollution and number of species. We need a formal statistical model. We will begin by doing it the "wrong" way with a linear model, and diagnose what is incorrect. **Note**: Look carrefully at the graph you have just created, and you might already be able to detect a potential problem. What is it? **Hint**: what do you think the blue straight line of invertebrate species will be at high levels of pollution such as 12 or 15 mg/l?
 
 ## 1.3 Incorrect analysis via linear model
 For the linear model we simply set our count of the number of species as the response, and pollution level as the explanatory in the usual way. Go ahead and store the results of your `lm()` call in an R object called `sppcount_lm`, and produce a summary of the results. Check that you get the following:
@@ -147,7 +147,7 @@ lm_species_predictor(12)
 Uh oh! We seem to be predicting a **negative** number of species, but we know that this is biological nonsense. The minimum value we should get is zero.
 
 ## 1.4 GLM and Simeon Poisson to the rescue...
-GLMs are much more flexible, and we can use them to produce a much better and biologically meaningful model. Simeon Poisson was an early 19th Century French mathematician devised a distribution that handled count rather than continuous data. See [This interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-and-binomial-distributions) to view the Poisson distribution. When the website loads, the distribution initially looks like a normal distribution, but with whole numbers. It has one parameter $\lambda$ (Greek letter lambda). Move the slider. You will notice that the distribution never contains values less than zero.
+GLMs are much more flexible, and we can use them to produce a much better and biologically meaningful model. Simeon Poisson was an early 19th Century French mathematician devised a distribution that handled count rather than continuous data. See [This interactive website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/#section-poisson-distribution) to view the Poisson distribution. When the website loads, the distribution initially looks like a normal distribution, but with whole numbers. It has one parameter $\lambda$ (Greek letter lambda). Move the slider. You will notice that the distribution never contains values less than zero.
 
 Let's now change from a linear model to a generalised linear model. If we simply replace `lm()` with `glm()` we will actually get the same results as before, because it defaults to using a normal distribution. However, if we use the `family` option we can specify that we want a Poisson distribution. Try the following and check your results match:
 
