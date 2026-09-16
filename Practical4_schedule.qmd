@@ -28,7 +28,7 @@ Generalised linear models (GLMs) are, as their name suggests, an extension of th
 * **Positive numbers only** Heights of oak trees, weights of brown rats, yield of crops, mean length of haddock landed etc. These numbers might have decimal places, but they cannot be negative
 * **Proportion or percentages** These are "bounded" numbers, between 0 and 1.0, or 0 and 100 respectively.
 
-If you use a conventional linear model with these types of data, when you check the model assumptions, especially via a QQ plot, you may observe distortions, suggesting the linear model is not valid. You can sometimes transform your data before analysis by a linear model, for example take the `log(number_of_birds + 1)` as a response variable (we include the `+ 1` as it is not possible to take a logarithm of zero). However, it is usually better to use a generalised linear model from the outset.
+If you use a conventional linear model with these types of data, when you check the model assumptions, especially via a QQ plot, you may observe distortions, suggesting the linear model is not valid. You can sometimes transform your data before analysis by a linear model, for example take the `log(number_of_birds + 1)` as a response variable (we include the `+ 1` as it is not possible to take a logarithm of zero). However, it is usually better to use a generalised linear model from the outset. However, this technique of `log(n +1)` only works if the highest values of `n` are above about 30; with small maximum values the `+ 1` component distorts the analysis.
 
 A linear model works best with normal (Gaussian) data, but a GLM can be extended to a wide range of data types, including all four described above. To remind yourself of the underlying theory of GLMs go to [This Interactive Website](https://naturalandenvironmentalscience.shinyapps.io/generalised_linear_models/) and we will begin by using some of the examples from that website.
 
@@ -238,7 +238,14 @@ gf_point(species ~ pollution, data=sppcount_dat) %>%
   gf_refine(theme_classic())
 ```
 
+## Other alternatives for count data
+You may sometimes find that with count data even a Poisson distribution is not a very goood error model for your data. This is especially the case if you have "sparse" data, with a relatively large proportion of zero counts, which is also referred to as zero-inflated in some texts. In these cases, using the **negative binomial** distribution can sometimes be useful. Unfortunately, this requires the use of the `MASS` library with the `nb.glm()` function so adds a layer of complexity. The following table summarises some of the options for dealing with count data:
 
+| Method                                                 | Advantages                                                                                              | Disadvantages                                                                                                                        |
+|--------------------------------------------------------|---------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| Linear model with `log(n+1)` response                  | Simple to implement, using standard `lm()` syntax                                                       | No longer analysing original units. Unsuitable if the typical number of counts (n) observed is low as the `+1` distorts the analysis |
+| generalised linear model with Poisson errors           | Simple to implement, using standard `glm()` syntax and error model directly handles whole number counts | Often biological datasets contain a high proportion of zero counts, which cause problems for Poisson                                 |
+| generalised linear model with negative binomial errors | Error model directly handles whole number counts, and more robust if data are zero-inflated                  | Requires use of `MASS` R package, and `nb.glm()` function                                                                              |
 
 # GLMs with Binary Data
 Your experiment may produce categorical response data, e.g. male or female, wilted or turgid, infected or uninfected, dead or alive. Note that a response such as simply 'dead' or 'alive' differs from a response where you have counts of the numbers of dead or alive out of your original sample. So binary data can have two slightly different forms:
